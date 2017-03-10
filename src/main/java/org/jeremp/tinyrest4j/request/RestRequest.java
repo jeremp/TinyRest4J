@@ -10,20 +10,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.jeremp.tinyrest4j.exceptions.InvalidUrlException;
+import org.jeremp.tinyrest4j.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jpasseron
  */
 public abstract class RestRequest {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(RestRequest.class);
 	
 	protected String httpMethod ;
 	protected Map<String, String> parameters = new HashMap<>();
@@ -41,7 +42,12 @@ public abstract class RestRequest {
 
 	public RestResponse doRequest() {		
 		try {
-			System.out.println("Request = "+this.toString());
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Tracing Request: "+this.toString());
+			}
+			LOG.debug("DEBUG");
+			LOG.info("INFO");
+			
 			HttpURLConnection connection = buildConnection();
 
 			int responseCode = connection.getResponseCode();			
@@ -69,9 +75,13 @@ public abstract class RestRequest {
 	
 	public RestRequest basicAuth(byte[] login, byte[] password) {	
 		byte[] semicolumn = ":".getBytes(Constants.UTF8);
-		List<Byte> allBytes = new ArrayList<>();
-		allBytes.addAll(Arrays.<Byte>asList(login));
-		String b64EncodedData = Base64.getEncoder().encodeToString(sb.toString().getBytes(Constants.UTF8));
+		int fullLength = login.length + semicolumn.length + password.length ;
+		byte[] fullArray = new byte[fullLength];		
+		ByteBuffer target = ByteBuffer.wrap(fullArray);
+		target.put(login);
+		target.put(semicolumn);
+		target.put(password);		
+		String b64EncodedData = Base64.getEncoder().encodeToString(target.array());
 		this.addHeader("Authorization", "Basic "+b64EncodedData);
 		return this ;
 	}
