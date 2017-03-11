@@ -5,9 +5,11 @@ import java.io.BufferedReader;
 import org.jeremp.tinyrest4j.exceptions.RequestException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Base64;
@@ -42,13 +44,12 @@ public abstract class RestRequest {
 
 	public RestResponse doRequest() {		
 		try {
-			if(LOG.isDebugEnabled()){
-				LOG.debug("Tracing Request: "+this.toString());
-			}
-			LOG.debug("DEBUG");
-			LOG.info("INFO");
-			
+
 			HttpURLConnection connection = buildConnection();
+
+			if(LOG.isDebugEnabled()){
+				LOG.debug(this.toString());
+			}
 
 			int responseCode = connection.getResponseCode();			
 			Charset responseCharset = Constants.DEFAULT_RESPONSE_CHARSET ;
@@ -61,9 +62,15 @@ public abstract class RestRequest {
 			while ((inputLine = in.readLine()) != null) {
 				response.append(inputLine);
 			}
-			in.close();			
-			return new RestResponse(responseCode, connection.getHeaderFields(), response.toString());
+			in.close();
 
+			RestResponse restResponse = new RestResponse(responseCode, connection.getHeaderFields(), response.toString());
+
+			if(LOG.isDebugEnabled()){
+				LOG.debug(restResponse.toString());
+			}
+
+			return restResponse ;
 		} catch (IOException ex) {
 			throw new RequestException(ex);
 		}		
@@ -109,6 +116,7 @@ public abstract class RestRequest {
 	}
 	
 	private HttpURLConnection buildConnection() throws IOException {
+		url = buildUrlWithParameters();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod(httpMethod);
 		
@@ -124,9 +132,30 @@ public abstract class RestRequest {
 
 	@Override
 	public String toString() {
-		return "RestRequest{" + "httpMethod=" + httpMethod + ", parameters=" + parameters + ", headers=" + headers + ", url=" + url + '}';
+		return "RestRequest{" + "httpMethod=" + httpMethod + ",\nparameters=" + parameters + ",\nheaders=" + headers + ",\nurl=" + url + '}';
 	}
-	
+
+	private URL buildUrlWithParameters() throws UnsupportedEncodingException, MalformedURLException {
+		if(parameters.isEmpty()){
+			return url ;
+		}else{
+			String fullURL = url.toExternalForm();
+			if(StringUtils.isNotBlank(url.getQuery())){
+				fullURL += "&" ;
+			}else{
+				fullURL += "?" ;
+			}
+			int index = 0 ;
+			for(String name : parameters.keySet()){
+				index++ ;
+				fullURL = fullURL + name + "=" + URLEncoder.encode(parameters.get(name), "UTF-8");
+				if(index < parameters.size()){
+					fullURL += "&" ;
+				}
+			}
+			return new URL(fullURL);
+		}
+	}
 	
 	
 	

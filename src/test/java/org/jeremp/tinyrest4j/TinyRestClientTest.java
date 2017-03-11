@@ -25,11 +25,9 @@ public class TinyRestClientTest {
 
 	@Test
 	public void testGet() {
-		String url = "http://vivoptimdev.extelia.fr:8080/vivoptim-ws/";
+		String url = "http://petstore.swagger.io/v2/pet/findByStatus";
 		TinyRest tinyRestClient = new TinyRest();		
-		RestResponse result = tinyRestClient.get(url).basicAuth("prm".getBytes(), "prm".getBytes()).withParam("q", "toto").doRequest();
-		
-		
+		RestResponse result = tinyRestClient.get(url).basicAuth("prm".getBytes(), "prm".getBytes()).withParam("status", "available").doRequest();
 	}
 	
 }

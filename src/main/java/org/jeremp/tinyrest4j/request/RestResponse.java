@@ -30,5 +30,13 @@ public class RestResponse {
 	public String getBody() {
 		return body;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "RestResponse{" +
+				"status=" + status +
+				", headers=" + headers +
+				", body='" + body + '\'' +
+				"}\n";
+	}
 }
