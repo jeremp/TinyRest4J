@@ -4,6 +4,7 @@ import org.jeremp.tinyrest4j.utils.Constants;
 import java.io.BufferedReader;
 import org.jeremp.tinyrest4j.exceptions.RequestException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jpasseron
  */
-public abstract class RestRequest {
+public abstract class RestRequest<T extends RestRequest> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RestRequest.class);
 	
@@ -32,7 +33,7 @@ public abstract class RestRequest {
 	protected Map<String, String> parameters = new HashMap<>();
 	protected Map<String, String> headers = new HashMap<>();
 	protected URL url ;	
-
+	
 	public RestRequest(String httpMethod, String url) {
 		this.httpMethod = httpMethod;
 		try {
@@ -56,7 +57,13 @@ public abstract class RestRequest {
 			if(StringUtils.isNotBlank(connection.getContentEncoding())){				
 				responseCharset = Charset.forName(connection.getContentEncoding());				
 			}
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), responseCharset));
+			InputStream responseStream ;
+			try {
+				responseStream = connection.getInputStream();
+			} catch (IOException e) {
+				responseStream = connection.getErrorStream();
+			}
+			BufferedReader in = new BufferedReader(new InputStreamReader(responseStream, responseCharset));
 			String inputLine;
 			StringBuilder response = new StringBuilder();		
 			while ((inputLine = in.readLine()) != null) {
@@ -75,8 +82,14 @@ public abstract class RestRequest {
 			throw new RequestException(ex);
 		}		
 	}
+	
 	public RestRequest withParam(String name, String value){
 		this.addParameter(name, value);
+		return this ;
+	}
+	
+	public RestRequest withHeader(String name, String value){
+		this.addHeader(name, value);
 		return this ;
 	}
 	
@@ -115,7 +128,7 @@ public abstract class RestRequest {
 		return url;
 	}
 	
-	private HttpURLConnection buildConnection() throws IOException {
+	protected HttpURLConnection buildConnection() throws IOException {
 		url = buildUrlWithParameters();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod(httpMethod);
@@ -132,7 +145,7 @@ public abstract class RestRequest {
 
 	@Override
 	public String toString() {
-		return "RestRequest{" + "httpMethod=" + httpMethod + ",\nparameters=" + parameters + ",\nheaders=" + headers + ",\nurl=" + url + '}';
+		return "RestRequest{\n\t" + "httpMethod=" + httpMethod + ",\n\tparameters=" + parameters + ",\n\theaders=" + headers + ",\n\turl=" + url + "\n}";
 	}
 
 	private URL buildUrlWithParameters() throws UnsupportedEncodingException, MalformedURLException {

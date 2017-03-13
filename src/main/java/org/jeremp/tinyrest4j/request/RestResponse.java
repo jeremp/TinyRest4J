@@ -34,9 +34,9 @@ public class RestResponse {
 	@Override
 	public String toString() {
 		return "RestResponse{" +
-				"status=" + status +
-				", headers=" + headers +
-				", body='" + body + '\'' +
-				"}\n";
+				"\n\tstatus=" + status +
+				",\n\theaders=" + headers +
+				",\n\tbody='" + body + '\'' +
+				"\n}";
 	}
 }
