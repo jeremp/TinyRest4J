@@ -16,6 +16,10 @@ public class PostRequest extends RestRequest {
 	public PostRequest(String url) {
 		super("POST", url);
 	}
+	
+	protected PostRequest(String url, String httpMethod){
+		super(httpMethod, url);
+	}
 
 	@Override
 	protected HttpURLConnection buildConnection() throws IOException {

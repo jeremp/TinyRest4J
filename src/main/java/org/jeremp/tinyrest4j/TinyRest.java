@@ -6,6 +6,7 @@ import java.util.Map;
 import org.jeremp.tinyrest4j.request.DeleteRequest;
 import org.jeremp.tinyrest4j.request.GetRequest;
 import org.jeremp.tinyrest4j.request.PostRequest;
+import org.jeremp.tinyrest4j.request.PutRequest;
 
 /**
  *
@@ -25,5 +26,9 @@ public class TinyRest {
 	
 	public PostRequest post(String url){
 		return new PostRequest(url);
+	}	
+
+	public PutRequest put(String url){
+		return new PutRequest(url);
 	}
 }
