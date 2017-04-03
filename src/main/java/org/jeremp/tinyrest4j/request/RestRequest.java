@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jeremp.tinyrest4j.exceptions.InvalidUrlException;
 import org.jeremp.tinyrest4j.utils.StringUtils;
+import org.jeremp.tinyrest4j.utils.TinyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,16 +95,8 @@ public abstract class RestRequest<T extends RestRequest> {
 		return this ;
 	}
 	
-	public RestRequest basicAuth(byte[] login, byte[] password) {	
-		byte[] semicolumn = ":".getBytes(Constants.UTF8);
-		int fullLength = login.length + semicolumn.length + password.length ;
-		byte[] fullArray = new byte[fullLength];		
-		ByteBuffer target = ByteBuffer.wrap(fullArray);
-		target.put(login);
-		target.put(semicolumn);
-		target.put(password);		
-		String b64EncodedData = Base64.getEncoder().encodeToString(target.array());
-		this.addHeader("Authorization", "Basic "+b64EncodedData);
+	public RestRequest basicAuth(byte[] login, byte[] password) {			
+		this.addHeader(Constants.AUTH_HEADER_NAME, TinyUtils.produceBasicAuthHeaderValue(login, password));
 		return this ;
 	}
 

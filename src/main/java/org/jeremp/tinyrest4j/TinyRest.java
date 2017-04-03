@@ -7,6 +7,8 @@ import org.jeremp.tinyrest4j.request.GetRequest;
 import org.jeremp.tinyrest4j.request.PostRequest;
 import org.jeremp.tinyrest4j.request.PutRequest;
 import org.jeremp.tinyrest4j.request.RestRequest;
+import org.jeremp.tinyrest4j.utils.Constants;
+import org.jeremp.tinyrest4j.utils.TinyUtils;
 
 /**
  *
@@ -52,5 +54,10 @@ public class TinyRest {
 	public TinyRest alwaysApplyHeader(String name, String value){
 		alwaysAppliedHeaders.put(name, value);
 		return this;
+	}
+	
+	public TinyRest alwaysApplyBasicAuth(byte[] login, byte[] password){
+		alwaysApplyHeader(Constants.AUTH_HEADER_NAME, TinyUtils.produceBasicAuthHeaderValue(login, password));
+		return this ;
 	}
 }
