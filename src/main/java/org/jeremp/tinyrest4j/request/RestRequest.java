@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author jpasseron
+ * @param <T>
  */
 public abstract class RestRequest<T extends RestRequest> {
 	
