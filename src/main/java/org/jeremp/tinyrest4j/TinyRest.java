@@ -50,6 +50,11 @@ public class TinyRest {
 		}
 		return restRequest;
 	}
+
+	public TinyRest withGZip(){
+		alwaysAppliedHeaders.put(Constants.ENCODING_HEADER_NAME, Constants.GZIP_ENCODING_VALUE);
+		return this;
+	}
 	
 	public TinyRest alwaysApplyHeader(String name, String value){
 		alwaysAppliedHeaders.put(name, value);
