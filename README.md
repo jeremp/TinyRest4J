@@ -44,3 +44,14 @@ RestResponse anotherResult = tiny.delete(anotherUrl).doRequest();
 ## HTTP Proxy support
 
 Proxy support is provided by Java's networking properties (host, port, non proxy hosts...)  learn more at https://docs.oracle.com/javase/7/docs/api/java/net/doc-files/net-properties.html
+
+## GZIP Support
+
+The `tiny.withGZip()` is a convenient method to ask the remote server for gzip compression. It adds the accept-encoding header.
+ 
+```java
+// this 
+tiny.withGZip();  
+// is shorter than this  
+tiny.alwaysApplyHeader("accept-encoding", "gzip");
+```
