@@ -1,12 +1,11 @@
 package org.jeremp.tinyrest4j.request;
 
 import org.jeremp.tinyrest4j.utils.Constants;
-import java.io.BufferedReader;
+
+import java.io.*;
+
 import org.jeremp.tinyrest4j.exceptions.RequestException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,6 +15,8 @@ import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+
 import org.jeremp.tinyrest4j.exceptions.InvalidUrlException;
 import org.jeremp.tinyrest4j.utils.StringUtils;
 import org.jeremp.tinyrest4j.utils.TinyUtils;
@@ -54,18 +55,27 @@ public abstract class RestRequest<T extends RestRequest> {
 				LOG.debug(this.toString());
 			}
 
-			int responseCode = connection.getResponseCode();			
-			Charset responseCharset = Constants.DEFAULT_RESPONSE_CHARSET ;
-			if(StringUtils.isNotBlank(connection.getContentEncoding())){				
-				responseCharset = Charset.forName(connection.getContentEncoding());				
-			}
+			int responseCode = connection.getResponseCode();
+
 			InputStream responseStream ;
 			try {
 				responseStream = connection.getInputStream();
 			} catch (IOException e) {
 				responseStream = connection.getErrorStream();
 			}
-			BufferedReader in = new BufferedReader(new InputStreamReader(responseStream, responseCharset));
+
+			Charset responseCharset = Constants.DEFAULT_RESPONSE_CHARSET ;
+			Reader reader ;
+			if(StringUtils.equalsIgnoreCase(Constants.GZIP_ENCODING_VALUE, connection.getContentEncoding())){
+				reader = new InputStreamReader(new GZIPInputStream(connection.getInputStream()));
+			}else{
+				if(StringUtils.isNotBlank(connection.getContentEncoding())){
+					responseCharset = Charset.forName(connection.getContentEncoding());
+				}
+				reader = new InputStreamReader(responseStream, responseCharset);
+			}
+
+			BufferedReader in = new BufferedReader(reader);
 			String inputLine;
 			StringBuilder response = new StringBuilder();		
 			while ((inputLine = in.readLine()) != null) {
